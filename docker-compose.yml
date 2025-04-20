@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      - SECRET_KEY=supersecretkey
+    networks:
+      - ordersys-net
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    networks:
+      - ordersys-net
+
+networks:
+  ordersys-net:
