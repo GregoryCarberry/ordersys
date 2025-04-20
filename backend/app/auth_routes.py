@@ -1,12 +1,11 @@
+# backend/app/auth_routes.py
+
 from flask import Blueprint, request, session, jsonify
+from werkzeug.security import check_password_hash
+from app.db import get_user_from_db
+from app.permissions import refresh_user_permissions
 
 auth_bp = Blueprint('auth', __name__)
-
-# Hardcoded users
-users = {
-    "manager": "password123",
-    "staff": "password123"
-}
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
@@ -17,11 +16,23 @@ def login():
     username = data.get('username')
     password = data.get('password')
 
-    if username in users and users[username] == password:
-        session['username'] = username
-        session['role'] = "manager" if username == "manager" else "staff"
+    user = get_user_from_db(username)
+
+    if user and check_password_hash(user['password_hash'], password):
+        session['user_id'] = user['id']
+        session['username'] = user['username']
+        session['role'] = user['role']
+        session['store_id'] = user['store_id']
+        session['can_grant_permissions'] = bool(user['can_grant_permissions'])
+        session['permissions'] = refresh_user_permissions(user)
         session.permanent = True
-        return jsonify({"logged_in": True, "username": username, "role": session['role']}), 200
+
+        return jsonify({
+            "logged_in": True,
+            "username": user['username'],
+            "role": user['role']
+        }), 200
+
     return jsonify({"logged_in": False, "message": "Invalid credentials"}), 401
 
 @auth_bp.route('/check-session', methods=['GET'])
@@ -38,3 +49,4 @@ def check_session():
 def logout():
     session.clear()
     return jsonify({"message": "Logged out"}), 200
+
