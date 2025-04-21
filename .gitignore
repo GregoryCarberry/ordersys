@@ -1,0 +1,32 @@
+# Ignore Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore Docker-related files (optional if you generate any)
+*.log
+docker-compose.override.yml
+
+# Ignore local environment variables
+backend/.env
+
+# Ignore your SQLite database
+backend/users.db
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Optional: Ignore VSCode settings if you're using it
+.vscode/
+
+# Optional: Ignore virtual environments if you create any
+venv/
+.env/
+
+# Ignore local environment files
+*.db
+*.pyc
+__pycache__/
+backend/flask_session/
+backend/testfile

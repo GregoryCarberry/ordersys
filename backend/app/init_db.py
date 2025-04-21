@@ -1,32 +1,43 @@
 import sqlite3
 import json
 import os
+import shutil
 from werkzeug.security import generate_password_hash
 
-DB_FILENAME = 'users.db'
+# Correct absolute path to database file
+DB_FILENAME = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'users.db')
+DB_FILENAME = os.path.abspath(DB_FILENAME)
 
 def init_db():
     create_db = False
 
-    # If database file does not exist, obviously need to create it
+    # Check if users.db exists
     if not os.path.exists(DB_FILENAME):
+        create_db = True
+    elif os.path.isdir(DB_FILENAME):
+        print(f"[!] WARNING: '{DB_FILENAME}' is a folder, not a database file. Removing folder...")
+        shutil.rmtree(DB_FILENAME)
         create_db = True
     else:
         # Connect and check if 'users' table exists
-        conn = sqlite3.connect(DB_FILENAME)
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT name FROM sqlite_master WHERE type='table' AND name='users';
-        """)
-        if cursor.fetchone() is None:
+        try:
+            conn = sqlite3.connect(DB_FILENAME)
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT name FROM sqlite_master WHERE type='table' AND name='users';
+            """)
+            if cursor.fetchone() is None:
+                create_db = True
+            conn.close()
+        except sqlite3.Error as e:
+            print(f"[!] SQLite error while checking database: {e}")
             create_db = True
-        conn.close()
 
     if not create_db:
-        print(f"Database '{DB_FILENAME}' already initialized with 'users' table. Skipping.")
+        print(f"[✔] Database '{DB_FILENAME}' already initialized with 'users' table. Skipping.")
         return
 
-    print(f"Initializing database '{DB_FILENAME}'...")
+    print(f"[+] Initializing database '{DB_FILENAME}'...")
 
     conn = sqlite3.connect(DB_FILENAME)
     cursor = conn.cursor()
@@ -61,7 +72,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-    print("Database initialization complete.")
+    print("[✔] Database initialization complete.")
 
 if __name__ == '__main__':
     init_db()

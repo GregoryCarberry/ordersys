@@ -2,3 +2,6 @@ flask
 flask-cors
 flask-session
 werkzeug
+
+Flask>=2.2
+python-dotenv>=1.0

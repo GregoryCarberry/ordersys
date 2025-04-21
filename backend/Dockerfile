@@ -1,17 +1,17 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
-# Copy all backend code EXCEPT users.db
-COPY app/*.py /app/app/
-COPY app/entrypoint.sh /app/
-COPY requirements.txt /app/
-COPY run.py /app/
+COPY requirements.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN pip install --no-cache-dir -r /app/requirements.txt
+# COPY backend/ .   <-- REMOVE this, because volumes will bring the code
+# No entrypoint.sh anymore
 
-RUN chmod +x /app/entrypoint.sh
+ENV FLASK_APP=app.py
+ENV FLASK_RUN_HOST=0.0.0.0
+ENV FLASK_ENV=development
 
-WORKDIR /app
+EXPOSE 5000
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["flask", "run", "--reload"]
