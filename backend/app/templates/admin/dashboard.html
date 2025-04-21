@@ -24,8 +24,9 @@
             display: block;
             padding: 10px;
         }
-        #sidebar a:hover {
+        #sidebar a.active, #sidebar a:hover {
             background: #495057;
+            font-weight: bold;
         }
         #content {
             flex-grow: 1;
@@ -33,18 +34,32 @@
             overflow-y: auto;
         }
     </style>
+    
 </head>
 <body>
 
     <div id="sidebar">
         <h4 class="text-center">Admin Panel</h4>
         <hr>
-        <a href="/admin/dashboard">Dashboard</a>
-        <a href="#">Manage Users</a>
-        <a href="#">Manage Stores</a>
-        <a href="#">Manage Orders</a>
-        <a href="/logout">Logout</a>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/admin/dashboard' %}active{% endif %}" href="/admin/dashboard">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/admin/users' %}active{% endif %}" href="/admin/users">Manage Users</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/admin/stores' %}active{% endif %}" href="/admin/stores">Manage Stores</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/admin/orders' %}active{% endif %}" href="/admin/orders">Manage Orders</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/logout">Logout</a>
+            </li>
+        </ul>
     </div>
+    
 
     <div id="content">
         <h1>Dashboard Overview</h1>

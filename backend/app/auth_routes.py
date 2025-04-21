@@ -1,11 +1,15 @@
 # backend/app/auth_routes.py
 
-from flask import Blueprint, request, session, jsonify
+from flask import Blueprint, request, session, jsonify, redirect, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 from app.db import get_user_from_db, get_db_connection, save_permissions_to_db
 from app.permissions import refresh_user_permissions
 
 auth_bp = Blueprint('auth', __name__)
+
+@auth_bp.route('/login', methods=['GET'])
+def login_get():
+    return redirect("http://localhost:3000/")  
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
@@ -45,10 +49,11 @@ def check_session():
         }), 200
     return jsonify({"logged_in": False}), 401
 
-@auth_bp.route('/logout', methods=['POST'])
+@auth_bp.route('/logout', methods=['GET', 'POST'])
 def logout():
     session.clear()
-    return jsonify({"message": "Logged out"}), 200
+    return redirect(url_for('auth.login')) # Redirect to login page
+
 
 @auth_bp.route('/grant-permissions', methods=['POST'])
 def grant_permissions():
