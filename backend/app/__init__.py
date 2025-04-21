@@ -9,7 +9,10 @@ def create_app():
     CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
     Session(app)
 
+    # Register blueprints
     from app.auth_routes import auth_bp
+    from app.admin_routes import admin_bp  
     app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp)        
 
     return app
