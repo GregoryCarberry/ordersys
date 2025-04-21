@@ -27,3 +27,18 @@ def dashboard():
         'orders_this_week': 45
     }
     return render_template('admin/dashboard.html', stats=stats)
+
+@admin_bp.route('/users')
+@admin_required
+def manage_users():
+    return render_template('admin/manage_users.html')
+
+@admin_bp.route('/stores')
+@admin_required
+def manage_stores():
+    return render_template('admin/manage_stores.html')
+
+@admin_bp.route('/orders')
+@admin_required
+def manage_orders():
+    return render_template('admin/manage_orders.html')
