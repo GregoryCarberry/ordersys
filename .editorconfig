@@ -1,0 +1,32 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# Top-most EditorConfig file
+root = true
+
+# Python and general files
+[*.py]
+charset = utf-8
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# HTML, CSS, JS (frontend files)
+[*.{html,css,js}]
+charset = utf-8
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Markdown files
+[*.md]
+charset = utf-8
+trim_trailing_whitespace = false
+insert_final_newline = true
+
+# YAML files (docker-compose, etc.)
+[*.yml]
+indent_style = space
+indent_size = 2
+insert_final_newline = true
