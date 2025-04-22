@@ -7,26 +7,26 @@ __pycache__/
 *.log
 docker-compose.override.yml
 
-# Ignore local environment variables
+# Ignore environment variables
+.env
 backend/.env
 
-# Ignore your SQLite database
+# Ignore databases
+*.db
 backend/users.db
 
-# Ignore OS files
+# Ignore OS-generated files
 .DS_Store
 Thumbs.db
 
-# Optional: Ignore VSCode settings if you're using it
+# Ignore VSCode settings
 .vscode/
 
-# Optional: Ignore virtual environments if you create any
+# Ignore Python virtual environments
 venv/
-.env/
 
-# Ignore local environment files
-*.db
-*.pyc
-__pycache__/
+# Ignore Flask session storage (if stored server-side)
 backend/flask_session/
+
+# Ignore any scratch/test files
 backend/testfile
