@@ -1,4 +1,8 @@
 from app import create_app
+from app.admin_routes import admin_bp
+
+app.register_blueprint(admin_bp)
+
 
 app = create_app()
 
