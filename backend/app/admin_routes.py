@@ -67,3 +67,50 @@ def edit_user_api(user_id):
     print(f"Updating user {user_id} with data: {data}")
     # TODO: Update the database here
     return jsonify({"message": f"User {user_id} updated"}), 200
+
+# Dummy store list to simulate a database
+dummy_stores = [
+    {"id": 1, "name": "Telford Central", "location": "Albion Street", "active": True},
+    {"id": 2, "name": "Wellington", "location": "Station Road", "active": True},
+    {"id": 3, "name": "Oakengates", "location": "", "active": False}
+]
+
+@admin_bp.route('/api/stores', methods=['GET'])
+@admin_required
+def get_stores():
+    return jsonify(dummy_stores)
+
+@admin_bp.route('/api/stores', methods=['POST'])
+@admin_required
+def create_store():
+    data = request.get_json()
+    new_id = max(store['id'] for store in dummy_stores) + 1 if dummy_stores else 1
+    new_store = {
+        "id": new_id,
+        "name": data['name'],
+        "location": data.get('location', ''),
+        "active": data.get('active', True)
+    }
+    dummy_stores.append(new_store)
+    return jsonify({"message": "Store created", "store": new_store}), 201
+
+@admin_bp.route('/api/stores/<int:store_id>', methods=['PUT'])
+@admin_required
+def update_store(store_id):
+    data = request.get_json()
+    for store in dummy_stores:
+        if store['id'] == store_id:
+            store['name'] = data['name']
+            store['location'] = data.get('location', '')
+            store['active'] = data.get('active', True)
+            return jsonify({"message": "Store updated", "store": store}), 200
+    return jsonify({"error": "Store not found"}), 404
+
+@admin_bp.route('/api/stores/<int:store_id>', methods=['DELETE'])
+@admin_required
+def delete_store(store_id):
+    for store in dummy_stores:
+        if store['id'] == store_id:
+            dummy_stores.remove(store)
+            return jsonify({"message": "Store deleted"}), 200
+    return jsonify({"error": "Store not found"}), 404
