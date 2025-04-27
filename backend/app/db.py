@@ -2,8 +2,13 @@ import sqlite3
 import json
 import os
 
+from flask_sqlalchemy import SQLAlchemy
+db = SQLAlchemy()
+
+
 # Calculate the correct absolute path
 # DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'users.db')
+
 DB_PATH = "/app/users.db"
 
 

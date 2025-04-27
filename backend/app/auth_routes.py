@@ -1,5 +1,3 @@
-# backend/app/auth_routes.py
-
 from flask import Blueprint, request, session, jsonify, redirect, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 from app.db import get_user_from_db, get_db_connection, save_permissions_to_db

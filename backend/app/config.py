@@ -1,6 +1,8 @@
 from dotenv import load_dotenv
 import os
 
+basedir = os.path.abspath(os.path.dirname(__file__))
+
 load_dotenv()
 
 class Config:
@@ -12,3 +14,5 @@ class Config:
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
     SESSION_COOKIE_SECURE = False
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, '../../users.db')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False

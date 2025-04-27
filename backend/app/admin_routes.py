@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, session, abort, request, jsonify
 from functools import wraps
+from app.db import db
+from app.models.store import Store
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -78,39 +80,47 @@ dummy_stores = [
 @admin_bp.route('/api/stores', methods=['GET'])
 @admin_required
 def get_stores():
-    return jsonify(dummy_stores)
+    stores = Store.query.all()
+    return jsonify([
+        {
+            'id': store.id,
+            'name': store.name,
+            'location': store.location,
+            'active': store.active
+        } for store in stores
+    ])
+
 
 @admin_bp.route('/api/stores', methods=['POST'])
 @admin_required
 def create_store():
     data = request.get_json()
-    new_id = max(store['id'] for store in dummy_stores) + 1 if dummy_stores else 1
-    new_store = {
-        "id": new_id,
-        "name": data['name'],
-        "location": data.get('location', ''),
-        "active": data.get('active', True)
-    }
-    dummy_stores.append(new_store)
-    return jsonify({"message": "Store created", "store": new_store}), 201
+    store = Store(
+        name=data['name'],
+        location=data.get('location', ''),
+        active=data.get('active', True)
+    )
+    db.session.add(store)
+    db.session.commit()
+    return jsonify({"message": "Store created", "store_id": store.id}), 201
+
 
 @admin_bp.route('/api/stores/<int:store_id>', methods=['PUT'])
 @admin_required
 def update_store(store_id):
+    store = Store.query.get_or_404(store_id)
     data = request.get_json()
-    for store in dummy_stores:
-        if store['id'] == store_id:
-            store['name'] = data['name']
-            store['location'] = data.get('location', '')
-            store['active'] = data.get('active', True)
-            return jsonify({"message": "Store updated", "store": store}), 200
-    return jsonify({"error": "Store not found"}), 404
+    store.name = data['name']
+    store.location = data.get('location', '')
+    store.active = data.get('active', True)
+    db.session.commit()
+    return jsonify({"message": "Store updated"})
+
 
 @admin_bp.route('/api/stores/<int:store_id>', methods=['DELETE'])
 @admin_required
 def delete_store(store_id):
-    for store in dummy_stores:
-        if store['id'] == store_id:
-            dummy_stores.remove(store)
-            return jsonify({"message": "Store deleted"}), 200
-    return jsonify({"error": "Store not found"}), 404
+    store = Store.query.get_or_404(store_id)
+    db.session.delete(store)
+    db.session.commit()
+    return jsonify({"message": "Store deleted"})
