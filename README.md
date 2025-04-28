@@ -1,10 +1,11 @@
 # Internal Ordering System
 
 [![Branches](https://img.shields.io/badge/branches-main%20%7C%20dev-blue)](https://github.com/GregoryCarberry/ordersys/branches)
-[![Last Commit](https://img.shields.io/github/last-commit/GregoryCarberry/ordersys)](https://github.com/GregoryCarberry/ordersys/commits/dev)
+[![Last Commit](https://img.shields.io/github/last-commit/GregoryCarberry/ordersys)](https://github.com/GregoryCarberry/ordersys/commits)
 [![Repo Size](https://img.shields.io/github/repo-size/GregoryCarberry/ordersys)](https://github.com/GregoryCarberry/ordersys)
 [![Issues](https://img.shields.io/github/issues/GregoryCarberry/ordersys)](https://github.com/GregoryCarberry/ordersys/issues)
 [![Pull Requests](https://img.shields.io/github/issues-pr/GregoryCarberry/ordersys)](https://github.com/GregoryCarberry/ordersys/pulls)
+
 
 
 ---
