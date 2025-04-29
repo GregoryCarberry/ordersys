@@ -1,0 +1,70 @@
+<!-- frontend/store_dashboard.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Store Dashboard - Orders</title>
+</head>
+<body>
+    <h1>Store Dashboard - Orders</h1>
+
+    <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Status</th>
+                <th>Created At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="ordersTableBody">
+            <!-- Orders will be inserted here -->
+        </tbody>
+    </table>
+
+    <p id="noOrdersMessage" style="display: none;">No orders found for your store.</p>
+
+    <script>
+        async function fetchOrders() {
+            try {
+                const response = await fetch('http://localhost:5000/api/store/orders', {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch orders');
+                }
+
+                const orders = await response.json();
+                const tableBody = document.getElementById('ordersTableBody');
+                const noOrdersMessage = document.getElementById('noOrdersMessage');
+
+                if (orders.length === 0) {
+                    noOrdersMessage.style.display = 'block';
+                    return;
+                }
+
+                orders.forEach(order => {
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td>${order.id}</td>
+                        <td>${order.status}</td>
+                        <td>${new Date(order.created_at).toLocaleString()}</td>
+                        <td><a href="order_detail.html?order_id=${order.id}">View</a></td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error(error);
+                document.getElementById('noOrdersMessage').textContent = 'Error loading orders.';
+                document.getElementById('noOrdersMessage').style.display = 'block';
+            }
+        }
+
+        fetchOrders();
+    </script>
+</body>
+</html>

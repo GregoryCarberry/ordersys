@@ -3,6 +3,9 @@ import json
 import os
 import shutil
 from werkzeug.security import generate_password_hash
+from app.db import engine, Base
+from app.models.store import Store
+from app.models.order import Order
 
 # Correct absolute path to database file
 DB_FILENAME = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'users.db')
@@ -33,46 +36,46 @@ def init_db():
             print(f"[!] SQLite error while checking database: {e}")
             create_db = True
 
-    if not create_db:
-        print(f"[✔] Database '{DB_FILENAME}' already initialized with 'users' table. Skipping.")
-        return
+    if create_db:
+        print(f"[+] Initializing database '{DB_FILENAME}'...")
 
-    print(f"[+] Initializing database '{DB_FILENAME}'...")
+        conn = sqlite3.connect(DB_FILENAME)
+        cursor = conn.cursor()
 
-    conn = sqlite3.connect(DB_FILENAME)
-    cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                role TEXT NOT NULL,
+                permissions TEXT DEFAULT '[]',
+                can_grant_permissions INTEGER DEFAULT 0,
+                store_id INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
 
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
-            role TEXT NOT NULL,
-            permissions TEXT DEFAULT '[]',
-            can_grant_permissions INTEGER DEFAULT 0,
-            store_id INTEGER DEFAULT 0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
+        # Insert root user
+        root_password_hash = generate_password_hash('changeme123')
+        cursor.execute('''
+            INSERT INTO users (username, password_hash, role, permissions, can_grant_permissions, store_id)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (
+            'root',
+            root_password_hash,
+            'root',
+            json.dumps(['*']),
+            1,
+            0
+        ))
 
-    # Insert root user
-    root_password_hash = generate_password_hash('changeme123')
-    cursor.execute('''
-        INSERT INTO users (username, password_hash, role, permissions, can_grant_permissions, store_id)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', (
-        'root',
-        root_password_hash,
-        'root',
-        json.dumps(['*']),
-        1,
-        0
-    ))
+        conn.commit()
+        conn.close()
 
-    conn.commit()
-    conn.close()
+        print("[✔] Database initialization complete.")
 
-    print("[✔] Database initialization complete.")
+    # 🔥 Finally create SQLAlchemy tables AFTER DB file exists
+    Base.metadata.create_all(bind=engine)
 
 if __name__ == '__main__':
     init_db()

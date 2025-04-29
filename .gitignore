@@ -30,3 +30,6 @@ backend/flask_session/
 
 # Ignore any scratch/test files
 backend/testfile
+
+# Ignore Windows alternate data streams
+*.Zone.Identifier

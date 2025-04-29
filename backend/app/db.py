@@ -3,7 +3,17 @@ import json
 import os
 
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 db = SQLAlchemy()
+
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///users.db")
+
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(bind=engine)
+Base = declarative_base()
 
 
 # Calculate the correct absolute path

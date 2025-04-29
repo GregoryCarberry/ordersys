@@ -1,9 +1,16 @@
-from app.db import db
+# backend/app/models/store.py
 
-class Store(db.Model):
+from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy.orm import relationship
+from app.db import Base
+
+class Store(Base):
     __tablename__ = 'stores'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False, unique=True)
-    location = db.Column(db.String(255), nullable=True)
-    active = db.Column(db.Boolean, default=True)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False, unique=True)
+    location = Column(String(255), nullable=True)
+    active = Column(Boolean, default=True)
+
+    # Relationship to Order model
+    orders = relationship("Order", back_populates="store")

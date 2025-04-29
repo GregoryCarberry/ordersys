@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Details</title>
+</head>
+<body>
+    <h1>Order Details</h1>
+
+    <div id="orderInfo">
+        <!-- Order details will be inserted here -->
+    </div>
+
+    <p id="loadingMessage">Loading order...</p>
+    <p id="errorMessage" style="color: red; display: none;">Order not found or an error occurred.</p>
+
+    <br>
+
+    <a href="store_dashboard.html">← Back to Store Dashboard</a>
+
+    <script>
+        function getOrderIdFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('order_id');
+        }
+
+        async function fetchOrderDetails(orderId) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/store/orders/${orderId}`, {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch order details');
+                }
+
+                const order = await response.json();
+                document.getElementById('loadingMessage').style.display = 'none';
+
+                const orderInfo = document.getElementById('orderInfo');
+
+                let itemsHtml = '<ul>';
+                const items = JSON.parse(order.items);
+                items.forEach(item => {
+                    itemsHtml += `<li>${item.sku} - Quantity: ${item.quantity}</li>`;
+                });
+                itemsHtml += '</ul>';
+
+                orderInfo.innerHTML = `
+                    <p><strong>Order ID:</strong> ${order.id}</p>
+                    <p><strong>Status:</strong> ${order.status}</p>
+                    <p><strong>Created At:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+                    <h3>Items:</h3>
+                    ${itemsHtml}
+                `;
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        }
+
+        const orderId = getOrderIdFromURL();
+        if (orderId) {
+            fetchOrderDetails(orderId);
+        } else {
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
