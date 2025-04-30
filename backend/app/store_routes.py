@@ -1,6 +1,7 @@
-from flask import Blueprint, jsonify, session
+from flask import Blueprint, jsonify, session, request
 from app.db import SessionLocal
 from app.models.order import Order
+import json
 
 store_routes = Blueprint('store_routes', __name__)
 
@@ -52,3 +53,35 @@ def get_order_detail(order_id):
         })
     finally:
         db.close()
+
+@store_routes.route('/api/store/orders', methods=['POST'])
+def create_order():
+    if 'user_id' not in session or 'store_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+    if not data or 'items' not in data:
+        return jsonify({'error': 'Missing items in request'}), 400
+
+    try:
+        items_json = json.dumps(data['items'])  # Store items as JSON string
+        new_order = Order(
+            store_id=session['store_id'],
+            items=items_json,
+            status='pending'
+        )
+
+        db = SessionLocal()
+        db.add(new_order)
+        db.commit()
+        db.refresh(new_order)
+        db.close()
+
+        return jsonify({
+            'message': 'Order created successfully',
+            'order_id': new_order.id
+        }), 201
+
+    except Exception as e:
+        print(f"Error creating order: {e}")
+        return jsonify({'error': 'Internal server error'}), 500

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create New Order</title>
+</head>
+<body>
+    <h1>Create a New Order</h1>
+
+    <form id="orderForm">
+        <div id="itemList">
+            <div class="item">
+                <label>SKU: <input type="text" name="sku" required></label>
+                <label>Quantity: <input type="number" name="quantity" min="1" required></label>
+            </div>
+        </div>
+
+        <button type="button" onclick="addItem()">+ Add Another Item</button>
+        <br><br>
+        <button type="submit">Submit Order</button>
+    </form>
+
+    <p id="responseMessage"></p>
+    <br>
+    <a href="store_dashboard.html">← Back to Store Dashboard</a>
+
+    <script>
+        function addItem() {
+            const itemList = document.getElementById('itemList');
+            const newItem = document.createElement('div');
+            newItem.className = 'item';
+            newItem.innerHTML = `
+                <label>SKU: <input type="text" name="sku" required></label>
+                <label>Quantity: <input type="number" name="quantity" min="1" required></label>
+                <button type="button" onclick="this.parentElement.remove()">Remove</button>
+            `;
+            itemList.appendChild(newItem);
+        }
+
+        document.getElementById('orderForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const items = [];
+            const itemElements = document.querySelectorAll('#itemList .item');
+            itemElements.forEach(item => {
+                const sku = item.querySelector('input[name="sku"]').value.trim();
+                const quantity = parseInt(item.querySelector('input[name="quantity"]').value, 10);
+                if (sku && quantity > 0) {
+                    items.push({ sku, quantity });
+                }
+            });
+
+            try {
+                const response = await fetch('http://localhost:5000/api/store/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ items })
+                });
+
+                const data = await response.json();
+
+                const msg = document.getElementById('responseMessage');
+                if (response.ok) {
+                    msg.style.color = 'green';
+                    msg.textContent = `Order submitted! Order ID: ${data.order_id}`;
+                    this.reset();  // Clear form
+                } else {
+                    msg.style.color = 'red';
+                    msg.textContent = `Error: ${data.error || 'Unknown error'}`;
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('responseMessage').textContent = 'Something went wrong submitting the order.';
+            }
+        });
+    </script>
+</body>
+</html>
