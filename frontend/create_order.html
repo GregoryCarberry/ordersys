@@ -10,8 +10,13 @@
     <form id="orderForm">
         <div id="itemList">
             <div class="item">
-                <label>SKU: <input type="text" name="sku" required></label>
+                <label>Product: 
+                    <input type="text" name="productSearch" class="product-search" autocomplete="off" required>
+                    <div class="autocomplete-results" style="position: relative;"></div>
+                </label>
+                
                 <label>Quantity: <input type="number" name="quantity" min="1" required></label>
+                <button type="button" onclick="this.parentElement.remove()">Remove</button>
             </div>
         </div>
 
@@ -25,16 +30,58 @@
     <a href="store_dashboard.html">← Back to Store Dashboard</a>
 
     <script>
+        function activateAutocomplete(input) {
+            input.addEventListener('input', async function () {
+                const query = this.value.trim();
+                const wrapper = this.parentElement.querySelector('.autocomplete-results');
+
+                if (query.length < 2) {
+                    wrapper.innerHTML = '';
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`http://localhost:5000/api/products/search?q=${encodeURIComponent(query)}`, {
+                        credentials: 'include'
+                    });
+                    const results = await res.json();
+
+                    wrapper.innerHTML = '';
+                    results.forEach(product => {
+                        const option = document.createElement('div');
+                        option.textContent = `${product.name} (${product.sku})`;
+                        option.style.cursor = 'pointer';
+                        option.style.background = '#eee';
+                        option.style.padding = '2px 6px';
+                        option.addEventListener('click', () => {
+                            input.value = product.sku;
+                            wrapper.innerHTML = '';
+                        });
+                        wrapper.appendChild(option);
+                    });
+                } catch (err) {
+                    console.error('Autocomplete error:', err);
+                }
+            });
+        }
+
+        // Activate for the initial input
+        document.querySelectorAll('.product-search').forEach(activateAutocomplete);
+
         function addItem() {
             const itemList = document.getElementById('itemList');
             const newItem = document.createElement('div');
             newItem.className = 'item';
             newItem.innerHTML = `
-                <label>SKU: <input type="text" name="sku" required></label>
+                <label>Product: 
+                    <input type="text" name="productSearch" class="product-search" autocomplete="off" required>
+                    <div class="autocomplete-results" style="position: relative;"></div>
+                </label>
                 <label>Quantity: <input type="number" name="quantity" min="1" required></label>
                 <button type="button" onclick="this.parentElement.remove()">Remove</button>
             `;
             itemList.appendChild(newItem);
+            activateAutocomplete(newItem.querySelector('.product-search'));
         }
 
         document.getElementById('orderForm').addEventListener('submit', async function(event) {
@@ -43,7 +90,7 @@
             const items = [];
             const itemElements = document.querySelectorAll('#itemList .item');
             itemElements.forEach(item => {
-                const sku = item.querySelector('input[name="sku"]').value.trim();
+                const sku = item.querySelector('input[name="productSearch"]').value.trim();
                 const quantity = parseInt(item.querySelector('input[name="quantity"]').value, 10);
                 if (sku && quantity > 0) {
                     items.push({ sku, quantity });
@@ -64,7 +111,7 @@
                 if (response.ok) {
                     msg.style.color = 'green';
                     msg.textContent = `Order submitted! Order ID: ${data.order_id}`;
-                    this.reset();  // Clear form
+                    this.reset();
                 } else {
                     msg.style.color = 'red';
                     msg.textContent = `Error: ${data.error || 'Unknown error'}`;
