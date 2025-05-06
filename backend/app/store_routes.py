@@ -2,6 +2,8 @@ from flask import Blueprint, jsonify, session, request
 from app.db import SessionLocal
 from app.models.order import Order
 import json
+from app.models.product import Product  # add this if not already
+from sqlalchemy import or_
 
 store_routes = Blueprint('store_routes', __name__)
 
@@ -85,3 +87,36 @@ def create_order():
     except Exception as e:
         print(f"Error creating order: {e}")
         return jsonify({'error': 'Internal server error'}), 500
+
+@store_routes.route('/api/products/search')
+def search_products():
+    if 'user_id' not in session or 'store_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    query = request.args.get('q', '').strip().lower()
+    if not query:
+        return jsonify([])
+
+    db = SessionLocal()
+    try:
+        products = db.query(Product).filter(
+            Product.active == True,
+            or_(
+                Product.name.ilike(f"%{query}%"),
+                Product.sku.ilike(f"%{query}%"),
+                Product.barcode.ilike(f"%{query}%")
+            )
+        ).limit(10).all()
+
+        result = []
+        for p in products:
+            result.append({
+                "id": p.id,
+                "sku": p.sku,
+                "name": p.name,
+                "barcode": p.barcode
+            })
+
+        return jsonify(result)
+    finally:
+        db.close()

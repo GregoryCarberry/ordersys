@@ -1,20 +1,18 @@
-import sqlite3
-import json
 import os
+import sqlite3
 import shutil
-from werkzeug.security import generate_password_hash
 from app.db import engine, Base
 from app.models.store import Store
 from app.models.order import Order
+from app.models.product import Product
 
-# Correct absolute path to database file
+# Absolute path to users.db
 DB_FILENAME = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'users.db')
 DB_FILENAME = os.path.abspath(DB_FILENAME)
 
 def init_db():
     create_db = False
 
-    # Check if users.db exists
     if not os.path.exists(DB_FILENAME):
         create_db = True
     elif os.path.isdir(DB_FILENAME):
@@ -22,13 +20,10 @@ def init_db():
         shutil.rmtree(DB_FILENAME)
         create_db = True
     else:
-        # Connect and check if 'users' table exists
         try:
             conn = sqlite3.connect(DB_FILENAME)
             cursor = conn.cursor()
-            cursor.execute("""
-                SELECT name FROM sqlite_master WHERE type='table' AND name='users';
-            """)
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users';")
             if cursor.fetchone() is None:
                 create_db = True
             conn.close()
@@ -55,27 +50,13 @@ def init_db():
             )
         ''')
 
-        # Insert root user
-        root_password_hash = generate_password_hash('changeme123')
-        cursor.execute('''
-            INSERT INTO users (username, password_hash, role, permissions, can_grant_permissions, store_id)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (
-            'root',
-            root_password_hash,
-            'root',
-            json.dumps(['*']),
-            1,
-            0
-        ))
-
         conn.commit()
         conn.close()
+        print("[✔] Base users table created.")
 
-        print("[✔] Database initialization complete.")
-
-    # 🔥 Finally create SQLAlchemy tables AFTER DB file exists
+    # Always ensure other SQLAlchemy tables are created
     Base.metadata.create_all(bind=engine)
+    print("[✔] SQLAlchemy tables created.")
 
 if __name__ == '__main__':
     init_db()

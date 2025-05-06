@@ -11,6 +11,7 @@ from app.store_routes import store_routes
 
 
 
+
 migrate = Migrate()
 
 def create_app():
@@ -29,6 +30,10 @@ def create_app():
     # Register blueprints
     from app.auth_routes import auth_bp
     from app.admin_routes import admin_bp
+    from app.order_admin_routes import order_admin_routes
+    from app.warehouse_routes import warehouse_routes
+    app.register_blueprint(warehouse_routes)
+    app.register_blueprint(order_admin_routes)
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(store_routes)

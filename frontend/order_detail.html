@@ -7,66 +7,187 @@
 <body>
     <h1>Order Details</h1>
 
-    <div id="orderInfo">
-        <!-- Order details will be inserted here -->
-    </div>
-
+    <div id="orderInfo"></div>
     <p id="loadingMessage">Loading order...</p>
     <p id="errorMessage" style="color: red; display: none;">Order not found or an error occurred.</p>
 
     <br>
-
     <a href="store_dashboard.html">← Back to Store Dashboard</a>
 
     <script>
-        function getOrderIdFromURL() {
-            const params = new URLSearchParams(window.location.search);
-            return params.get('order_id');
-        }
+        const orderId = new URLSearchParams(window.location.search).get('order_id');
 
-        async function fetchOrderDetails(orderId) {
+        async function fetchOrderDetails() {
             try {
                 const response = await fetch(`http://localhost:5000/api/store/orders/${orderId}`, {
                     credentials: 'include'
                 });
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch order details');
-                }
+                if (!response.ok) throw new Error('Failed to fetch order');
 
                 const order = await response.json();
                 document.getElementById('loadingMessage').style.display = 'none';
-
-                const orderInfo = document.getElementById('orderInfo');
-
-                let itemsHtml = '<ul>';
-                const items = JSON.parse(order.items);
-                items.forEach(item => {
-                    itemsHtml += `<li>${item.sku} - Quantity: ${item.quantity}</li>`;
-                });
-                itemsHtml += '</ul>';
-
-                orderInfo.innerHTML = `
-                    <p><strong>Order ID:</strong> ${order.id}</p>
-                    <p><strong>Status:</strong> ${order.status}</p>
-                    <p><strong>Created At:</strong> ${new Date(order.created_at).toLocaleString()}</p>
-                    <h3>Items:</h3>
-                    ${itemsHtml}
-                `;
-            } catch (error) {
-                console.error(error);
+                renderOrder(order);
+            } catch (err) {
+                console.error(err);
                 document.getElementById('loadingMessage').style.display = 'none';
                 document.getElementById('errorMessage').style.display = 'block';
             }
         }
 
-        const orderId = getOrderIdFromURL();
-        if (orderId) {
-            fetchOrderDetails(orderId);
-        } else {
-            document.getElementById('loadingMessage').style.display = 'none';
-            document.getElementById('errorMessage').style.display = 'block';
+        function renderOrder(order) {
+            const orderInfo = document.getElementById('orderInfo');
+            const items = JSON.parse(order.items);
+
+            let formHtml = `
+                <p><strong>Order ID:</strong> ${order.id}</p>
+                <p><strong>Status:</strong> ${order.status}</p>
+                <p><strong>Created At:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+                <form id="editForm">
+                    <h3>Edit Items</h3>
+                    <div id="editItems">
+            `;
+
+            items.forEach((item, index) => {
+                formHtml += `
+                    <div class="editItem">
+                        <label>SKU: 
+                            <input type="text" name="sku" value="${item.sku}" class="sku-input" required>
+                            <div class="autocomplete-results"></div>
+                        </label>
+                        <label>Quantity: <input type="number" name="quantity" value="${item.quantity}" min="1" required></label>
+                    </div>
+                `;
+            });
+
+            formHtml += `
+                    </div>
+                    <button type="submit">Save Changes</button>
+                </form>
+                <p id="editResponse"></p>
+            `;
+
+            // Add fulfilment button if status is pending
+            if (order.status === "pending") {
+                formHtml += `
+                    <hr>
+                    <button id="fulfillBtn">Mark Order as Fulfilled</button>
+                    <p id="fulfillResponse"></p>
+                `;
+            }
+
+            orderInfo.innerHTML = formHtml;
+
+            addEditLogic(order.id);
+            addFulfillLogic(order.id);
+            attachAutocomplete();
         }
+
+        function addEditLogic(orderId) {
+            const form = document.getElementById('editForm');
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const updatedItems = [];
+                const itemBlocks = document.querySelectorAll('.editItem');
+
+                itemBlocks.forEach(block => {
+                    const sku = block.querySelector('input[name="sku"]').value.trim();
+                    const qty = parseInt(block.querySelector('input[name="quantity"]').value, 10);
+                    if (sku && qty > 0) {
+                        updatedItems.push({ sku, quantity: qty });
+                    }
+                });
+
+                try {
+                    const res = await fetch(`http://localhost:5000/api/store/orders/${orderId}/edit`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ items: updatedItems })
+                    });
+
+                    const data = await res.json();
+                    const responseBox = document.getElementById('editResponse');
+                    if (res.ok) {
+                        responseBox.style.color = 'green';
+                        responseBox.textContent = "Order updated successfully.";
+                    } else {
+                        responseBox.style.color = 'red';
+                        responseBox.textContent = data.error || "Failed to update order.";
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            });
+        }
+
+        function addFulfillLogic(orderId) {
+            const btn = document.getElementById('fulfillBtn');
+            if (!btn) return;
+
+            btn.addEventListener('click', async () => {
+                try {
+                    const res = await fetch(`http://localhost:5000/api/warehouse/orders/${orderId}/fulfill`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include'
+                    });
+
+                    const data = await res.json();
+                    const msg = document.getElementById('fulfillResponse');
+                    if (res.ok) {
+                        msg.style.color = 'green';
+                        msg.textContent = data.message;
+                        btn.remove(); // Hide button after successful fulfil
+                    } else {
+                        msg.style.color = 'red';
+                        msg.textContent = data.error || 'Failed to fulfill order.';
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            });
+        }
+
+        function attachAutocomplete() {
+            document.querySelectorAll('.sku-input').forEach(input => {
+                const wrapper = input.parentElement.querySelector('.autocomplete-results');
+
+                input.addEventListener('input', async function () {
+                    const query = input.value.trim();
+                    if (query.length < 2) {
+                        wrapper.innerHTML = '';
+                        return;
+                    }
+
+                    try {
+                        const res = await fetch(`http://localhost:5000/api/products/search?q=${encodeURIComponent(query)}`, {
+                            credentials: 'include'
+                        });
+                        const results = await res.json();
+
+                        wrapper.innerHTML = '';
+                        results.forEach(product => {
+                            const div = document.createElement('div');
+                            div.textContent = `${product.name} (${product.sku})`;
+                            div.style.cursor = 'pointer';
+                            div.style.background = '#eee';
+                            div.style.padding = '2px 6px';
+                            div.addEventListener('click', () => {
+                                input.value = product.sku;
+                                wrapper.innerHTML = '';
+                            });
+                            wrapper.appendChild(div);
+                        });
+                    } catch (err) {
+                        console.error("Autocomplete fetch error", err);
+                    }
+                });
+            });
+        }
+
+        fetchOrderDetails();
     </script>
 </body>
 </html>
