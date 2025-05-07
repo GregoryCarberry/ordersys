@@ -1,3 +1,9 @@
+[![Branches](https://img.shields.io/badge/branches-main%20%7C%20dev-blue)](https://github.com/GregoryCarberry/ordersys/branches)
+[![Last Commit](https://img.shields.io/github/last-commit/GregoryCarberry/ordersys)](https://github.com/GregoryCarberry/ordersys/commits)
+[![Repo Size](https://img.shields.io/github/repo-size/GregoryCarberry/ordersys)](https://github.com/GregoryCarberry/ordersys)
+[![Issues](https://img.shields.io/github/issues/GregoryCarberry/ordersys)](https://github.com/GregoryCarberry/ordersys/issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/GregoryCarberry/ordersys)](https://github.com/GregoryCarberry/ordersys/pulls)
+
 # 💇 OrderSys
 
 A lightweight internal ordering system for multi-branch businesses like salons. Staff can request stock from a central warehouse, and warehouse staff can manage and fulfill those orders.
