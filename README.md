@@ -1,77 +1,94 @@
-# Internal Ordering System
+# 💇 OrderSys
 
-[![Branches](https://img.shields.io/badge/branches-main%20%7C%20dev-blue)](https://github.com/GregoryCarberry/ordersys/branches)
-[![Last Commit](https://img.shields.io/github/last-commit/GregoryCarberry/ordersys)](https://github.com/GregoryCarberry/ordersys/commits)
-[![Repo Size](https://img.shields.io/github/repo-size/GregoryCarberry/ordersys)](https://github.com/GregoryCarberry/ordersys)
-[![Issues](https://img.shields.io/github/issues/GregoryCarberry/ordersys)](https://github.com/GregoryCarberry/ordersys/issues)
-[![Pull Requests](https://img.shields.io/github/issues-pr/GregoryCarberry/ordersys)](https://github.com/GregoryCarberry/ordersys/pulls)
+A lightweight internal ordering system for multi-branch businesses like salons. Staff can request stock from a central warehouse, and warehouse staff can manage and fulfill those orders.
 
+## ✅ Features
 
-
----
-
-# OrderSys - Internal Stock Ordering Platform
-
-**OrderSys** is a lightweight, Dockerized internal ordering system designed for businesses with multiple store outlets and a central warehouse.
-
-It provides secure role-based login, store-specific order management, and future-ready inventory tracking using SKUs and barcodes.
+- 🔐 **Login system** with session handling
+- 🏪 **Store order dashboard** (view & place orders)
+- 📦 **Product search with autocomplete**
+- 🧾 **Order detail view**
+- ✏️ **Edit order items before fulfillment**
+- ✅ **Fulfil orders** (warehouse only)
+- 🐳 **Dockerised setup** for easy deployment
 
 ---
 
-## How to run
+## 🚀 Getting Started
 
-1. Build and start all services:
+### 1. Clone and run the project
 
 ```bash
+git clone https://github.com/GregoryCarberry/ordersys.git
+cd ordersys
 docker-compose up --build
 ```
-<br>
 
-2. Access the application:
+### 2. Seed the database
 
-- Frontend: [http://localhost:3000](http://localhost:3000)
-- Backend (API): [http://localhost:5000](http://localhost:5000)
-
----
-
-## Default credentials (demo users)
-
-| Role    | Username | Password    |
-|:--------|:---------|:------------|
-| Manager | manager  | password123 |
-| Staff   | staff    | password123 |
+```bash
+docker-compose run backend python -m app.init_db
+docker-compose run backend python app/seed_users.py
+docker-compose run backend python app/seed_products.py
+docker-compose run backend python app/seed_orders.py
+```
 
 ---
 
-## Current Features
+## 👥 Default Users
 
-- 🔐 Secure login and logout with session management
-- 🛡️ Role-based access control (Managers vs Staff)
-- 🛒 Store-specific stock ordering
-- 🧠 Session persists cleanly across page refreshes
-- 📦 SKU and barcode handling foundation (for future stock system)
-- 🐳 Full Docker Compose setup for easy deployment
-
----
-
-## Tech Stack
-
-- **Frontend:** HTML, CSS, JavaScript
-- **Backend:** Python (Flask)
-- **Containerization:** Docker, Docker Compose
-- **Version Control:** Git (`main` and `dev` branches)
+| Username  | Password     | Role       |
+|-----------|--------------|------------|
+| root      | changeme123  | root       |
+| manager   | password123  | manager    |
+| staff     | password123  | staff      |
+| warehouse | password123  | warehouse  |
 
 ---
 
-## Future Plans
+## 📁 Project Structure
 
-- 📈 Admin dashboard for warehouse stock management
-- 🏪 Store dashboards for tracking orders and deliveries
-- 📋 SKU/barcode validation for new stock entries
-- 📦 Full inventory management system
-- 📊 Reporting features (sales, stock levels)
+```
+ordersys/
+├── backend/
+│   └── app/
+│       ├── models/
+│       ├── templates/
+│       ├── db.py
+│       ├── init_db.py
+│       ├── seed_users.py
+│       ├── seed_products.py
+│       ├── seed_orders.py
+│       └── ...
+├── frontend/
+│   ├── login.html
+│   ├── store_dashboard.html
+│   ├── create_order.html
+│   ├── order_detail.html
+│   └── ...
+├── docker-compose.yml
+└── README.md
+```
 
 ---
 
-> 🚀 This project is under active development on the `dev` branch.  
-> Pull requests and contributions are welcome after the core system stabilizes.
+## 🧭 Roadmap
+
+- [ ] Warehouse dashboard for managing and fulfilling all incoming orders  
+- [ ] Granular per-user permission control  
+- [ ] Order change/audit tracking  
+- [ ] Responsive/mobile-first frontend  
+- [ ] Inventory reporting and low-stock alerts  
+
+---
+
+## 🧑‍💻 Author
+
+**Gregory Carberry**  
+[LinkedIn](https://www.linkedin.com/in/gregory-carberry/) • [Credly](https://www.credly.com/users/gregory-carberry)
+
+---
+
+## 📄 License
+
+MIT License — use, modify, and contribute freely.
