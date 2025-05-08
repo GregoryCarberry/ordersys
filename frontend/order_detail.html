@@ -123,32 +123,44 @@
         }
 
         function addFulfillLogic(orderId) {
-            const btn = document.getElementById('fulfillBtn');
-            if (!btn) return;
+    const btn = document.getElementById('fulfillBtn');
+    const msg = document.getElementById('fulfillResponse');
+    if (!btn || !msg) return;
 
-            btn.addEventListener('click', async () => {
-                try {
-                    const res = await fetch(`http://localhost:5000/api/warehouse/orders/${orderId}/fulfill`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include'
-                    });
-
-                    const data = await res.json();
-                    const msg = document.getElementById('fulfillResponse');
-                    if (res.ok) {
-                        msg.style.color = 'green';
-                        msg.textContent = data.message;
-                        btn.remove(); // Hide button after successful fulfil
-                    } else {
-                        msg.style.color = 'red';
-                        msg.textContent = data.error || 'Failed to fulfill order.';
-                    }
-                } catch (err) {
-                    console.error(err);
-                }
+    btn.addEventListener('click', async () => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/warehouse/orders/${orderId}/fulfill`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
             });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                msg.style.color = 'green';
+                msg.innerHTML = data.message;
+
+                if (data.low_stock_alerts && data.low_stock_alerts.length > 0) {
+                    const alertList = data.low_stock_alerts.map(item =>
+                        `<li>${item.name} (${item.sku}): Only ${item.remaining} left</li>`
+                    ).join('');
+                    msg.innerHTML += `<br><strong>⚠ Low Stock Alerts:</strong><ul>${alertList}</ul>`;
+                }
+
+                btn.remove(); // Hide button after successful fulfil
+            } else {
+                msg.style.color = 'red';
+                msg.textContent = data.error || 'Failed to fulfill order.';
+            }
+        } catch (err) {
+            console.error(err);
+            msg.style.color = 'red';
+            msg.textContent = 'Request failed.';
         }
+    });
+}
+
 
         function attachAutocomplete() {
             document.querySelectorAll('.sku-input').forEach(input => {
