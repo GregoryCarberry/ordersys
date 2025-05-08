@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Products</title>
+</head>
+<body>
+    <h1>Warehouse Product Management</h1>
+
+    <div>
+        <h2>Add / Update Product</h2>
+        <form id="productForm">
+            <label>SKU: <input type="text" id="sku" required></label><br>
+            <label>Name: <input type="text" id="name" required></label><br>
+            <label>Barcode: <input type="text" id="barcode"></label><br>
+            <label>Stock Quantity: <input type="number" id="stock_quantity" min="0" required></label><br>
+            <button type="submit">Save Product</button>
+        </form>
+    </div>
+
+    <hr>
+
+    <h2>All Products</h2>
+    <table border="1">
+        <thead>
+            <tr><th>SKU</th><th>Name</th><th>Barcode</th><th>Stock</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="productTableBody"></tbody>
+    </table>
+
+    <script>
+        async function fetchProducts() {
+            const res = await fetch('http://localhost:5000/api/warehouse/products', { credentials: 'include' });
+            const data = await res.json();
+            const tbody = document.getElementById('productTableBody');
+            tbody.innerHTML = '';
+            data.forEach(p => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${p.sku}</td>
+                    <td>${p.name}</td>
+                    <td>${p.barcode}</td>
+                    <td>${p.stock_quantity}</td>
+                    <td>
+                        <button onclick='loadProduct("${p.sku}")'>Edit</button>
+                        <button onclick='deleteProduct("${p.sku}")'>Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function loadProduct(sku) {
+            const row = [...document.querySelectorAll('#productTableBody tr')]
+                .find(r => r.firstChild.textContent === sku);
+            if (!row) return;
+
+            document.getElementById('sku').value = row.children[0].textContent;
+            document.getElementById('name').value = row.children[1].textContent;
+            document.getElementById('barcode').value = row.children[2].textContent;
+            document.getElementById('stock_quantity').value = row.children[3].textContent;
+        }
+
+        async function deleteProduct(sku) {
+            if (!confirm(`Are you sure you want to delete product ${sku}?`)) return;
+            const res = await fetch(`http://localhost:5000/api/warehouse/products/${sku}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            await fetchProducts();
+        }
+
+        document.getElementById('productForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const sku = document.getElementById('sku').value.trim();
+            const name = document.getElementById('name').value.trim();
+            const barcode = document.getElementById('barcode').value.trim();
+            const stock_quantity = parseInt(document.getElementById('stock_quantity').value, 10);
+
+            const method = await checkIfExists(sku) ? 'PUT' : 'POST';
+            const url = method === 'PUT' 
+                ? `http://localhost:5000/api/warehouse/products/${sku}` 
+                : `http://localhost:5000/api/warehouse/products`;
+
+            await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ sku, name, barcode, stock_quantity })
+            });
+
+            this.reset();
+            await fetchProducts();
+        });
+
+        async function checkIfExists(sku) {
+            const res = await fetch('http://localhost:5000/api/warehouse/products', { credentials: 'include' });
+            const products = await res.json();
+            return products.some(p => p.sku === sku);
+        }
+
+        fetchProducts();
+    </script>
+</body>
+</html>

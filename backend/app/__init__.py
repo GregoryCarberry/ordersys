@@ -32,6 +32,8 @@ def create_app():
     from app.admin_routes import admin_bp
     from app.order_admin_routes import order_admin_routes
     from app.warehouse_routes import warehouse_routes
+    from app.warehouse_product_routes import warehouse_products
+    app.register_blueprint(warehouse_products)
     app.register_blueprint(warehouse_routes)
     app.register_blueprint(order_admin_routes)
     app.register_blueprint(auth_bp)
