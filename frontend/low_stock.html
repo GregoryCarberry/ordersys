@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Low Stock Alerts</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #sidebar {
+      min-width: 250px;
+      max-width: 250px;
+      background: #343a40;
+      color: #fff;
+      flex-shrink: 0;
+      padding-top: 1rem;
+    }
+    #sidebar a {
+      color: #fff;
+      text-decoration: none;
+      display: block;
+      padding: 10px;
+    }
+    #sidebar a.active, #sidebar a:hover {
+      background: #495057;
+      font-weight: bold;
+    }
+    #content {
+      flex-grow: 1;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+    .table thead th {
+      background-color: #f8f9fa;
+    }
+    .badge-low {
+      background-color: #dc3545;
+    }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <h4 class="text-center">Warehouse</h4>
+  <hr>
+  <ul class="nav flex-column">
+    <li class="nav-item">
+      <a class="nav-link" href="warehouse_dashboard.html">Dashboard</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link active" href="low_stock.html">Low Stock Alerts</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/logout">Logout</a>
+    </li>
+  </ul>
+</div>
+
+<div id="content">
+  <h2>Low Stock Alerts</h2>
+  <p class="text-muted">Products currently below their configured stock threshold.</p>
+
+  <div id="alertContainer" class="mt-4">
+    <div class="spinner-border text-secondary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  async function loadLowStockAlerts() {
+    const container = document.getElementById('alertContainer');
+    try {
+      const response = await fetch('http://localhost:5000/api/warehouse/low-stock', {
+        credentials: 'include'
+      });
+      const data = await response.json();
+
+      if (!Array.isArray(data)) {
+        container.innerHTML = `<div class="alert alert-danger">Failed to load alerts.</div>`;
+        return;
+      }
+
+      if (data.length === 0) {
+        container.innerHTML = `<div class="alert alert-success">No low stock items at this time.</div>`;
+        return;
+      }
+
+      let tableHtml = `
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover align-middle">
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Product Name</th>
+                <th>Stock Quantity</th>
+                <th>Threshold</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      data.forEach(product => {
+        tableHtml += `
+          <tr>
+            <td>${product.sku}</td>
+            <td>${product.name}</td>
+            <td>${product.stock_quantity}</td>
+            <td>${product.low_stock_threshold}</td>
+            <td><span class="badge badge-low">LOW</span></td>
+          </tr>
+        `;
+      });
+
+      tableHtml += `
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      container.innerHTML = tableHtml;
+    } catch (err) {
+      console.error(err);
+      container.innerHTML = `<div class="alert alert-danger">Error loading data.</div>`;
+    }
+  }
+
+  loadLowStockAlerts();
+</script>
+
+</body>
+</html>

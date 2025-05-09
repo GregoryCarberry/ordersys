@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Warehouse Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #sidebar {
+            min-width: 250px;
+            max-width: 250px;
+            background: #212529;
+            color: #fff;
+            flex-shrink: 0;
+            padding-top: 1rem;
+        }
+        #sidebar a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+        }
+        #sidebar a.active, #sidebar a:hover {
+            background: #343a40;
+            font-weight: bold;
+        }
+        #content {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h4 class="text-center">Warehouse</h4>
+        <hr>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="warehouse_dashboard.html">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="low_stock.html">Low Stock Alerts</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/logout">Logout</a>
+            </li>
+        </ul>
+    </div>
+
+    <div id="content">
+        <h1>Welcome to the Warehouse Dashboard</h1>
+        <p>Select an option from the sidebar to manage stock or view alerts.</p>
+    </div>
+
+</body>
+</html>

@@ -10,3 +10,4 @@ class Product(Base):
     barcode = Column(String(100), unique=True, nullable=True)
     active = Column(Boolean, default=True)
     stock_quantity = Column(Integer, default=0)
+    low_stock_threshold = Column(Integer, default=10) 

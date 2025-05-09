@@ -89,3 +89,44 @@ def edit_order(order_id):
         return jsonify({"error": "Something went wrong"}), 500
     finally:
         db.close()
+
+@warehouse_routes.route('/api/products/<sku>/threshold', methods=['PATCH'])
+def update_threshold(sku):
+    if session.get("role") != "warehouse":
+        return jsonify({"error": "Unauthorized"}), 401
+
+    new_value = request.json.get("low_stock_threshold")
+    if new_value is None or not isinstance(new_value, int) or new_value < 0:
+        return jsonify({"error": "Invalid threshold value"}), 400
+
+    db = SessionLocal()
+    try:
+        product = db.query(Product).filter_by(sku=sku).first()
+        if not product:
+            return jsonify({"error": "Product not found"}), 404
+
+        product.low_stock_threshold = new_value
+        db.commit()
+        return jsonify({"message": f"Threshold updated to {new_value} for {sku}."})
+    finally:
+        db.close()
+
+@warehouse_routes.route('/api/warehouse/low-stock', methods=['GET'])
+def get_low_stock_products():
+    if 'user_id' not in session or session.get('role') != 'warehouse':
+        return jsonify({"error": "Unauthorized"}), 401
+
+    db = SessionLocal()
+    try:
+        products = db.query(Product).filter(Product.stock_quantity < Product.low_stock_threshold).all()
+        result = [
+            {
+                "sku": p.sku,
+                "name": p.name,
+                "stock_quantity": p.stock_quantity,
+                "low_stock_threshold": p.low_stock_threshold
+            } for p in products
+        ]
+        return jsonify(result)
+    finally:
+        db.close()
