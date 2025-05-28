@@ -1,5 +1,5 @@
-from app.db import SessionLocal
-from app.models.order import Order
+from .db import SessionLocal
+from .models.order import Order
 import json
 
 def seed_orders():
@@ -9,33 +9,33 @@ def seed_orders():
             Order(
                 store_id=1,
                 items=json.dumps([
-                    {"sku": "item001", "quantity": 2},
-                    {"sku": "item002", "quantity": 5}
+                    {"sku": "SHMP-001", "quantity": 2},
+                    {"sku": "CNDT-002", "quantity": 5}
                 ]),
                 status="pending"
             ),
             Order(
                 store_id=1,
                 items=json.dumps([
-                    {"sku": "item003", "quantity": 1},
-                    {"sku": "item004", "quantity": 3},
-                    {"sku": "item005", "quantity": 2}
+                    {"sku": "GEL-009", "quantity": 1},
+                    {"sku": "MASK-005", "quantity": 3}
                 ]),
                 status="fulfilled"
             ),
             Order(
                 store_id=1,
                 items=json.dumps([
-                    {"sku": "item006", "quantity": 4}
+                    {"sku": "OIL-003", "quantity": 4}
                 ]),
                 status="approved"
             )
         ]
+
         db.add_all(orders)
         db.commit()
-        print("[✔] Dummy orders with quantities seeded.")
+        print("[✔] Dummy orders seeded.")
     finally:
         db.close()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     seed_orders()

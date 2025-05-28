@@ -1,29 +1,34 @@
-import sqlite3
-import json
 import os
-
+import json
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
+# SQLAlchemy setup
 db = SQLAlchemy()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///users.db")
+# Get base project directory (~/ordersys)
+BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+
+# Define DB path (~/ordersys/backend/ordersys.db)
+DB_PATH = os.path.join(BASE_DIR, 'ordersys.db')
+
+# SQLAlchemy database URL
+DATABASE_URL = f"sqlite:///{DB_PATH}"
+
+print(f"🔍 DB_PATH used by SQLAlchemy: {DB_PATH}")
+print(f"🔍 DATABASE_URL used by SQLAlchemy: {DATABASE_URL}")
 
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
 
-
-# Calculate the correct absolute path
-# DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'users.db')
-
-DB_PATH = "/app/users.db"
-
-
+# Optional: Raw sqlite3 connection (only if you *really* need it)
 def get_db_connection():
-    conn = sqlite3.connect(DB_PATH)
+    db_path = os.path.join(BASE_DIR, 'backend', 'ordersys.db')
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row  # Enables dictionary-like access
     return conn
 

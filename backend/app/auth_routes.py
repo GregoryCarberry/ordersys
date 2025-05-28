@@ -1,7 +1,8 @@
 from flask import Blueprint, request, session, jsonify, redirect, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
-from app.db import get_user_from_db, get_db_connection, save_permissions_to_db
-from app.permissions import refresh_user_permissions
+from .db import get_user_from_db, get_db_connection, save_permissions_to_db
+from .permissions import refresh_user_permissions
+from .utils.session_utils import refresh_user_permissions
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -26,8 +27,10 @@ def login():
         session['role'] = user['role']
         session['store_id'] = user['store_id']
         session['can_grant_permissions'] = bool(user['can_grant_permissions'])
-        session['permissions'] = refresh_user_permissions(user)
         session.permanent = True
+
+        # ✅ Load permissions properly
+        refresh_user_permissions(username)
 
         return jsonify({
             "logged_in": True,

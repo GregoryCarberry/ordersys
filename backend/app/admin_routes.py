@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, session, abort, request, jsonify
 from functools import wraps
-from app.db import db
-from app.models.store import Store
+from .db import db
+from .models.store import Store
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 

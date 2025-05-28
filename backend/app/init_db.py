@@ -1,10 +1,10 @@
 import os
 import sqlite3
 import shutil
-from app.db import engine, Base
-from app.models.store import Store
-from app.models.order import Order
-from app.models.product import Product
+from .db import engine, Base
+from .models.store import Store
+from .models.order import Order
+from .models.product import Product
 
 # Absolute path to users.db
 DB_FILENAME = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'users.db')

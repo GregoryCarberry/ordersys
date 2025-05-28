@@ -3,11 +3,11 @@ from flask_cors import CORS
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from app.config import Config
-from app.db import db
-from app.models.store import Store
-from app.config import Config
-from app.store_routes import store_routes
+from .config import Config
+from .db import db
+from .models.store import Store
+from .config import Config
+from .store_routes import store_routes
 
 
 
@@ -25,14 +25,14 @@ def create_app():
 
     # defer importing models until app is set up
     with app.app_context():
-        from app.models.store import Store
+        from .models.store import Store
 
     # Register blueprints
-    from app.auth_routes import auth_bp
-    from app.admin_routes import admin_bp
-    from app.order_admin_routes import order_admin_routes
-    from app.warehouse_routes import warehouse_routes
-    from app.warehouse_product_routes import warehouse_products
+    from .auth_routes import auth_bp
+    from .admin_routes import admin_bp
+    from .order_admin_routes import order_admin_routes
+    from .warehouse_routes import warehouse_routes
+    from .warehouse_product_routes import warehouse_products
     app.register_blueprint(warehouse_products)
     app.register_blueprint(warehouse_routes)
     app.register_blueprint(order_admin_routes)

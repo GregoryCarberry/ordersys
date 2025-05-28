@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify, session
 from sqlalchemy.exc import SQLAlchemyError
-from app.db import SessionLocal
-from app.models.order import Order
-from app.models.product import Product
+from .db import SessionLocal
+from .models.order import Order
+from .models.product import Product
 import json
 
 warehouse_routes = Blueprint('warehouse_routes', __name__)

@@ -1,5 +1,5 @@
-from app.db import SessionLocal
-from app.models.product import Product
+from .db import SessionLocal
+from .models.product import Product
 
 # ✅ Sample product list
 sample_products = [

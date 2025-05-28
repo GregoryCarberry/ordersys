@@ -2,7 +2,7 @@
 
 from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import relationship
-from app.db import Base
+from ..db import Base
 
 class Store(Base):
     __tablename__ = 'stores'

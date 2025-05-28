@@ -1,6 +1,6 @@
 import json
-from app.db import SessionLocal
-from app.models.order import Order
+from .db import SessionLocal
+from .models.order import Order
 
 def parse_legacy_format(items_text):
     """

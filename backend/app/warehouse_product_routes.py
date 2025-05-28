@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, session
-from app.db import SessionLocal
-from app.models.product import Product
+from .db import SessionLocal
+from .models.product import Product
 
 warehouse_products = Blueprint('warehouse_products', __name__)
 

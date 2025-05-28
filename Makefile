@@ -104,3 +104,6 @@ deploy:
 	docker push yourdockerhubusername/ordersys-frontend:latest
 
 	@echo "[*] Deployment build and push complete! Ready to deploy remotely."
+
+seed-all:
+	docker compose exec backend python seed_all.py

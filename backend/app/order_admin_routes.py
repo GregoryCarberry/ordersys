@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify
-from app.db import SessionLocal
-from app.models.order import Order
-from app.models.product import Product
+from .db import SessionLocal
+from .models.order import Order
+from .models.product import Product
 import json
 
 order_admin_routes = Blueprint('order_admin_routes', __name__)

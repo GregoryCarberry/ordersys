@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, session, request
-from app.db import SessionLocal
-from app.models.order import Order
+from .db import SessionLocal
+from .models.order import Order
 import json
-from app.models.product import Product  # add this if not already
+from .models.product import Product  # add this if not already
 from sqlalchemy import or_
 
 store_routes = Blueprint('store_routes', __name__)

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
-from app.db import Base
+from ..db import Base
 
 class Order(Base):
     __tablename__ = 'orders'
@@ -11,5 +11,7 @@ class Order(Base):
     items = Column(Text, nullable=False)
     status = Column(String(50), default='pending')
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+    notes = Column(Text, nullable=True)
 
     store = relationship("Store", back_populates="orders")
